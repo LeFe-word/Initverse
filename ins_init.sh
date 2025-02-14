@@ -21,8 +21,8 @@ Description=Initverse Miner Service
 After=network.target
 
 [Service]
-ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://$WALLET.$NODE_NAME@pool-b.yatespool.com:32488 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 --cpu-devices 4 
-# ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://$WALLET.$NODE_NAME@pool-a.yatespool.com:31588 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 --cpu-devices 4
+# ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://$WALLET.$NODE_NAME@pool-b.yatespool.com:32488 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 --cpu-devices 4 
+ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://$WALLET.$NODE_NAME@pool-a.yatespool.com:31588 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 --cpu-devices 4
 WorkingDirectory=/root/initverse
 Restart=always
 User=root
@@ -32,9 +32,9 @@ Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 WantedBy=multi-user.target
 EOT"
 
-# sudo systemctl daemon-reload
-# sudo systemctl enable initverse-miner
-# sudo systemctl start initverse-miner
-# sudo systemctl status initverse-miner
+sudo systemctl daemon-reload
+sudo systemctl enable initverse-miner
+sudo systemctl start initverse-miner
+sudo systemctl status initverse-miner
 
 
