@@ -1,7 +1,7 @@
 # sudo nano /etc/systemd/system/initverse-miner.service
 
-sudo apt update
-sudo apt upgrade
+sudo apt update -y
+sudo apt upgrade -y
 apt install nano
 
 mkdir -p $HOME/initverse
