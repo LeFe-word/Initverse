@@ -10,8 +10,8 @@ wget https://github.com/Project-InitVerse/ini-miner/releases/download/v1.0.0/ini
 chmod +x iniminer-linux-x64
 cd
 
-#echo -e "EVM wallet:"
-#read WALLET
+echo -e "EVM wallet:"
+read WALLET
 echo -e "miner name:"
 read NODE_NAME
 
@@ -22,7 +22,7 @@ After=network.target
 
 [Service]
 #ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://$WALLET.$NODE_NAME@pool-b.yatespool.com:32488 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 --cpu-devices 4 --cpu-devices 5 
-ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://0x4e6026E7DCF633BBa37E4738e8393cEcFe048c9b.$NODE_NAME@pool-a.yatespool.com:31588 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 
+ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://$WALLET.$NODE_NAME@pool-a.yatespool.com:31588 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 
 #--cpu-devices 4 --cpu-devices 5
 WorkingDirectory=/root/initverse
 Restart=always
