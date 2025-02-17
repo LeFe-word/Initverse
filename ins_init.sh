@@ -22,7 +22,8 @@ After=network.target
 
 [Service]
 #ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://$WALLET.$NODE_NAME@pool-b.yatespool.com:32488 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 --cpu-devices 4 --cpu-devices 5 
-ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://0x4e6026E7DCF633BBa37E4738e8393cEcFe048c9b.$NODE_NAME@pool-a.yatespool.com:31588 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 --cpu-devices 4 --cpu-devices 5
+ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum+tcp://0x4e6026E7DCF633BBa37E4738e8393cEcFe048c9b.$NODE_NAME@pool-a.yatespool.com:31588 --cpu-devices 1 --cpu-devices 2 --cpu-devices 3 
+#--cpu-devices 4 --cpu-devices 5
 WorkingDirectory=/root/initverse
 Restart=always
 User=root
