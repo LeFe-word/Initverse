@@ -8,25 +8,29 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-# Создаём строку с аргументами --cpu-devices
+# Формируем строку новых аргументов
 CPU_DEVICES=""
 for dev in "$@"; do
     CPU_DEVICES+=" --cpu-devices $dev"
 done
 
-# Обновляем файл службы
-awk -v devices="$CPU_DEVICES" \
-    '/^ExecStart=/ { sub(/ --cpu-devices [0-9]+( --cpu-devices [0-9]+)*/, devices) } 1' \
-    "$SERVICE_FILE" > "$TEMP_FILE"
+# Обновляем строку ExecStart: удаляем все вхождения '--cpu-devices <число>'
+awk -v devices="$CPU_DEVICES" '
+  /^ExecStart=/ {
+    # Удаляем все аргументы --cpu-devices <число>
+    gsub(/ --cpu-devices [0-9]+/, "");
+    # Добавляем новые аргументы в конец строки
+    $0 = $0 devices;
+  }
+  { print }
+' "$SERVICE_FILE" > "$TEMP_FILE"
 
 mv "$TEMP_FILE" "$SERVICE_FILE"
 chmod 644 "$SERVICE_FILE"
 
-# Перезагружаем службу
+# Перезагружаем конфигурацию systemd и перезапускаем службу
 systemctl daemon-reload
 systemctl restart initverse-miner
 
-echo "Updated CPU devices: $CPU_DEVICES"
-
-
+echo "Обновлены CPU-устройства: $CPU_DEVICES"
 journalctl -u initverse-miner -n 25 -f --no-hostname
