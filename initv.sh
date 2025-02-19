@@ -1,45 +1,32 @@
 #!/bin/bash
 
-# Проверка, что передан аргумент с количеством CPU-устройств
-if [ -z "$1" ]; then
-  echo "Использование: $0 <количество CPU-устройств>"
-  exit 1
+SERVICE_FILE="/etc/systemd/system/initverse-miner.service"
+TEMP_FILE="/tmp/initverse-miner.service.tmp"
+
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <cpu-device-1> <cpu-device-2> ... <cpu-device-N>"
+    exit 1
 fi
 
-# Количество CPU-устройств
-CPU_DEVICES=$1
+# Создаём строку с аргументами --cpu-devices
+CPU_DEVICES=""
+for dev in "$@"; do
+    CPU_DEVICES+=" --cpu-devices $dev"
+done
 
-# Путь к файлу службы
-SERVICE_FILE="/etc/systemd/system/initverse-miner.service"
+# Обновляем файл службы
+awk -v devices="$CPU_DEVICES" \
+    '/^ExecStart=/ { sub(/ --cpu-devices [0-9]+( --cpu-devices [0-9]+)*/, devices) } 1' \
+    "$SERVICE_FILE" > "$TEMP_FILE"
 
-# Временный файл для хранения изменений
-TEMP_FILE=$(mktemp)
-
-# Чтение файла службы и изменение строки ExecStart
-while IFS= read -r line; do
-  if [[ $line == ExecStart=* ]]; then
-    # Извлечение адреса и пула
-    POOL=$(echo "$line" | awk '{print $2}')
-    # Формирование новой строки ExecStart
-    NEW_EXECSTART="ExecStart=/root/initverse/iniminer-linux-x64 --pool $POOL"
-    for ((i=1; i<=CPU_DEVICES; i++)); do
-      NEW_EXECSTART+=" --cpu-devices $i"
-    done
-    echo "$NEW_EXECSTART"
-  else
-    echo "$line"
-  fi
-done < "$SERVICE_FILE" > "$TEMP_FILE"
-
-# Перемещение временного файла в оригинальный
 mv "$TEMP_FILE" "$SERVICE_FILE"
+chmod 644 "$SERVICE_FILE"
 
-# Перезагрузка systemd для применения изменений
+# Перезагружаем службу
 systemctl daemon-reload
+systemctl restart initverse-miner
 
-# Перезапуск службы
-systemctl restart initverse-miner.service
+echo "Updated CPU devices: $CPU_DEVICES"
 
-echo "Файл службы обновлен и служба перезапущена с $CPU_DEVICES CPU-устройствами."
 
 journalctl -u initverse-miner -n 25 -f --no-hostname
