@@ -1,5 +1,6 @@
 #/bin/bash
 apt install screen
+apt install unzip
 sudo apt install build-essential pkg-config libssl-dev git-all -y
 
 sudo apt install -y protobuf-compiler
