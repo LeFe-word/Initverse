@@ -15,7 +15,7 @@ fi
 # Формируем новую строку с --cpu-devices
 NEW_CPU_DEVICES=""
 for ((i=1; i<=CPU_COUNT; i++)); do
-  NEW_CPU_DEVICES+=" --cpu-devices $i"
+  NEW_CPU_DEVICES+=" --cpu-devices $i "
 done
 
 # Используем sed для замены только части с --cpu-devices
