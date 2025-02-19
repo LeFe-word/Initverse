@@ -1,31 +1,45 @@
 #!/bin/bash
 
-# Путь к файлу службы
-SERVICE_FILE="/etc/systemd/system/initverse-miner.service"
-
-# Запрашиваем у пользователя количество CPU-устройств
-read -p "Введите количество CPU-устройств: " CPU_COUNT
-
-# Проверяем, что введено число
-if ! [[ "$CPU_COUNT" =~ ^[0-9]+$ ]]; then
-  echo "Ошибка: введите корректное число."
+# Проверка, что передан аргумент с количеством CPU-устройств
+if [ -z "$1" ]; then
+  echo "Использование: $0 <количество CPU-устройств>"
   exit 1
 fi
 
-# Формируем новую строку с --cpu-devices
-NEW_CPU_DEVICES=""
-for ((i=1; i<=CPU_COUNT; i++)); do
-  NEW_CPU_DEVICES+=" --cpu-devices $i"
-done
+# Количество CPU-устройств
+CPU_DEVICES=$1
 
-# Используем sed для замены только части с --cpu-devices
-sudo sed -i -E "s|(ExecStart=/root/initverse/iniminer-linux-x64 --pool stratum\+tcp://[^ ]+)|\\1$NEW_CPU_DEVICES|" "$SERVICE_FILE"
+# Путь к файлу службы
+SERVICE_FILE="/etc/systemd/system/initverse-miner.service"
 
-# Перезагружаем systemd, чтобы применить изменения
-sudo systemctl daemon-reload
+# Временный файл для хранения изменений
+TEMP_FILE=$(mktemp)
 
-# Перезапускаем службу
-sudo systemctl restart initverse-miner
+# Чтение файла службы и изменение строки ExecStart
+while IFS= read -r line; do
+  if [[ $line == ExecStart=* ]]; then
+    # Извлечение адреса и пула
+    POOL=$(echo "$line" | awk '{print $2}')
+    # Формирование новой строки ExecStart
+    NEW_EXECSTART="ExecStart=/root/initverse/iniminer-linux-x64 --pool $POOL"
+    for ((i=1; i<=CPU_DEVICES; i++)); do
+      NEW_EXECSTART+=" --cpu-devices $i"
+    done
+    echo "$NEW_EXECSTART"
+  else
+    echo "$line"
+  fi
+done < "$SERVICE_FILE" > "$TEMP_FILE"
 
-echo "Количество --cpu-devices изменено на: $NEW_CPU_DEVICES"
+# Перемещение временного файла в оригинальный
+mv "$TEMP_FILE" "$SERVICE_FILE"
+
+# Перезагрузка systemd для применения изменений
+systemctl daemon-reload
+
+# Перезапуск службы
+systemctl restart initverse-miner.service
+
+echo "Файл службы обновлен и служба перезапущена с $CPU_DEVICES CPU-устройствами."
+
 journalctl -u initverse-miner -n 25 -f --no-hostname
